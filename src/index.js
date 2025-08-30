@@ -20,10 +20,12 @@ export default {
 				const item = formData.get('item');
 				const message = formData.get('message');
 
+				// Validate required fields
 				if (!name || !email || !item) {
 					return new Response('Missing required fields', { status: 400 });
 				}
 
+				// Construct the email
 				const emailMessage = {
 					personalizations: [{ to: [{ email: 'order@tcdining.org' }] }],
 					from: { email: 'noreply@tcdining.org' },
@@ -31,15 +33,14 @@ export default {
 					content: [
 						{
 							type: 'text/plain',
-							value: `Name: ${name}\nEmail: ${email}\nItem: ${item}\nMessage: ${message}`,
+							value: `Name: ${name}\nEmail: ${email}\nItem: ${item}\nMessage: ${message || ''}`,
 						},
 					],
 				};
 
-				// Send email via Cloudflare Email binding
-				const emailResponse = await env.SEND_EMAIL.fetch('/send', {
+				// Send email via Cloudflare Email binding (FIXED: no '/send')
+				const emailResponse = await env.SEND_EMAIL.fetch(JSON.stringify(emailMessage), {
 					method: 'POST',
-					body: JSON.stringify(emailMessage),
 					headers: { 'Content-Type': 'application/json' },
 				});
 
@@ -56,7 +57,7 @@ export default {
 			}
 		}
 
-		// Not found
+		// Fallback for unmatched routes
 		return new Response('Not found', { status: 404 });
 	},
 };
