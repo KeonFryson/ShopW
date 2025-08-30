@@ -1,13 +1,3 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
-
 export default {
 	async fetch(request, env, ctx) {
 		const url = new URL(request.url);
@@ -145,7 +135,43 @@ export default {
 			});
 		}
 
-		// Default response for other routes
+		if (url.pathname === "/api/request" && request.method === "POST") {
+			const formData = await request.formData();
+			const name = formData.get("name");
+			const email = formData.get("email");
+			const item = formData.get("item");
+			const message = formData.get("message");
+
+			const emailMessage = {
+				personalizations: [
+					{ to: [{ email: "order@tcdining.org" }] }
+				],
+				from: { email: "noreply@tcdining.org" }, // Use a domain you control
+				subject: `New Item Request: ${item}`,
+				content: [
+					{
+						type: "text/plain",
+						value: `Name: ${name}\nEmail: ${email}\nItem: ${item}\nMessage: ${message}`
+					}
+				]
+			};
+
+			// Send the email using the EmailMessage API
+			const emailResponse = await env.SEND_EMAIL.fetch("mailto:order@tcdining.org", {
+				method: "POST",
+				body: JSON.stringify(emailMessage),
+				headers: { "Content-Type": "application/json" }
+			});
+
+			if (emailResponse.ok) {
+				return new Response("Request sent! Thank you.", {
+					headers: { "content-type": "text/plain" }
+				});
+			} else {
+				return new Response("Failed to send request.", { status: 500 });
+			}
+		}
+
 		return new Response("Not found", { status: 404 });
 	}
 };
