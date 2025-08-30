@@ -12,10 +12,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install Wrangler
-        run: npm install -g wrangler@3.15.0
-
       - name: Publish to Cloudflare Workers
-        run: wrangler publish
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
