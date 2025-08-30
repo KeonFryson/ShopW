@@ -31,16 +31,17 @@
 
 	// Service Bindings (communicate between multiple Workers)
 	// https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	"services": [
-		{
-			"binding": "SEND_EMAIL", // Must match env.SEND_EMAIL in your Worker code
-			"service": "email-worker" // Replace with your Email Worker name
-			// "environment": "production" // Optional: specify if you use environments
-		}
-	],
+	/**
+	 * Service Bindings (communicate between multiple Workers)
+	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
+	 */
+	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 
 	// Add this section to allow importing HTML as text
 	"rules": [
-		{ "type": "Text", "globs": ["**/*.html"] }
+		{
+			"type": "Text",
+			"globs": [ "**/*.html" ]
+		}
 	]
 }

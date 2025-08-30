@@ -80,11 +80,28 @@
 			button[type="submit"]:hover {
 				background: #0056b3;
 			}
+
+		#result {
+			margin-top: 1em;
+			text-align: center;
+			display: none;
+		}
+
+		.text-green-500 {
+			color: green;
+		}
+
+		.text-red-500 {
+			color: red;
+		}
+
+		.text-gray-500 {
+			color: gray;
+		}
 	</style>
 </head>
 <body>
 	<h1>My Shop</h1>
-
 	<div class="items">
 		<div class="item">
 			<img src="item1.jpg" alt="Item 1">
@@ -99,28 +116,91 @@
 			<button onclick="requestItem('Item 2')">Request</button>
 		</div>
 	</div>
-
-	<form id="requestForm" action="/api/request" method="POST">
+	<form id="requestForm" method="POST" novalidate>
 		<h2>Request an Item</h2>
 		<label>Your Name</label>
 		<input type="text" name="name" required>
-
 		<label>Your Email</label>
 		<input type="email" name="email" required>
-
 		<label>Requested Item</label>
 		<input type="text" id="itemField" name="item" readonly>
-
 		<label>Message</label>
 		<textarea name="message" rows="5"></textarea>
-
+		<label>Attachment (optional, max 1MB)</label>
+		<input type="file" id="attachment" name="attachment" />
 		<button type="submit">Send Request</button>
 	</form>
-
-	<script>function requestItem(itemName) {
-      document.getElementById('requestForm').style.display = 'block';
-      document.getElementById('itemField').value = itemName;
-      window.scrollTo({ top: document.getElementById('requestForm').offsetTop, behavior: 'smooth' });
-    }</script>
+	<div id="result" class="text-gray-500"></div>
+	<script>
+		function requestItem(itemName) {
+			document.getElementById('requestForm').style.display = 'block';
+			document.getElementById('itemField').value = itemName;
+			window.scrollTo({ top: document.getElementById('requestForm').offsetTop, behavior: 'smooth' });
+		}
+		(function () {
+			"use strict";
+			const form = document.getElementById("requestForm");
+			const result = document.getElementById("result");
+			form.addEventListener("submit", function (event) {
+				if (!form.checkValidity()) {
+					event.preventDefault();
+					event.stopPropagation();
+					const firstInvalid = form.querySelector(":invalid");
+					if (firstInvalid) firstInvalid.focus();
+				} else {
+					event.preventDefault();
+					event.stopPropagation();
+					const formData = new FormData(form);
+					formData.append("access_key", "541c4d15-634c-4668-9767-f1eef2fe9605");
+					formData.append("subject", "New Submission from Web3Forms");
+					const fileInput = document.getElementById("attachment");
+					if (fileInput && fileInput.files.length > 0) {
+						const file = fileInput.files[0];
+						const filesize = file.size / 1024;
+						if (filesize > 1000) {
+							result.innerHTML = "Please upload file less than 1 MB";
+							result.style.display = "block";
+							result.classList.remove("text-green-500", "text-gray-500");
+							result.classList.add("text-red-500");
+							return;
+						}
+					}
+					result.innerHTML = "Please wait...";
+					result.style.display = "block";
+					result.classList.remove("text-green-500", "text-red-500");
+					result.classList.add("text-gray-500");
+					fetch("https://api.web3forms.com/submit", {
+						method: "POST",
+						body: formData
+					})
+						.then(async (response) => {
+							let json = await response.json();
+							if (response.status == 200) {
+								result.innerHTML = json.message;
+								result.classList.remove("text-gray-500");
+								result.classList.add("text-green-500");
+							} else {
+								result.innerHTML = json.message || "Submission failed.";
+								result.classList.remove("text-gray-500");
+								result.classList.add("text-red-500");
+							}
+						})
+						.catch(() => {
+							result.innerHTML = "Something went wrong!";
+							result.classList.remove("text-gray-500");
+							result.classList.add("text-red-500");
+						})
+						.then(function () {
+							form.reset();
+							form.classList.remove("was-validated");
+							setTimeout(() => {
+								result.style.display = "none";
+							}, 5000);
+						});
+				}
+				form.classList.add("was-validated");
+			}, false);
+		})();
+	</script>
 </body>
 </html>
