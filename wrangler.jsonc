@@ -37,5 +37,13 @@
 			"service": "email-worker" // Replace with your Email Worker name
 			// "environment": "production" // Optional: specify if you use environments
 		}
+	],
+
+	// Add this section to allow importing HTML as text
+	"rules": [
+		{
+			"type": "Text",
+			"globs": [ "**/*.html" ]
+		}
 	]
 }
