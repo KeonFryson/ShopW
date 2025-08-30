@@ -2,7 +2,12 @@ import shopHtml from './shop.html';
 
 export default {
 	async fetch(request, env, ctx) {
-		const url = new URL(request.url);
+		let url;
+		try {
+			url = new URL(request.url, "http://localhost");
+		} catch {
+			return new Response("Invalid request URL", { status: 400 });
+		}
 
 		if (url.pathname === "/") {
 			return new Response(shopHtml, {
@@ -44,6 +49,12 @@ export default {
 			} else {
 				return new Response("Failed to send request.", { status: 500 });
 			}
+		}
+
+		if (request.method === "POST" && url.pathname === "/send") {
+			const emailMessage = await request.json();
+			await message.send(emailMessage);
+			return new Response("Email sent");
 		}
 
 		return new Response("Not found", { status: 404 });
