@@ -1,4 +1,6 @@
 import shopHtml from './shop.html';
+import { EmailMessage } from "cloudflare:email";
+import { createMimeMessage } from "mimetext";
 
 export default {
 	async fetch(request, env) {
@@ -18,46 +20,39 @@ export default {
 				const name = formData.get('name');
 				const email = formData.get('email');
 				const item = formData.get('item');
-				const message = formData.get('message');
+				const messageText = formData.get('message') || "";
 
-				// Validate required fields
 				if (!name || !email || !item) {
 					return new Response('Missing required fields', { status: 400 });
 				}
 
-				// Construct the email
-				const emailMessage = {
-					personalizations: [{ to: [{ email: 'order@tcdining.org' }] }],
-					from: { email: 'noreply@tcdining.org' },
-					subject: `New Item Request: ${item}`,
-					content: [
-						{
-							type: 'text/plain',
-							value: `Name: ${name}\nEmail: ${email}\nItem: ${item}\nMessage: ${message || ''}`,
-						},
-					],
-				};
-
-				// Send email via Cloudflare Email binding (FIXED: no '/send')
-				const emailResponse = await env.SEND_EMAIL.fetch(JSON.stringify(emailMessage), {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
+				// Create MIME email
+				const msg = createMimeMessage();
+				msg.setSender({ name: "Shop Request", addr: "noreply@yourdomain.com" });
+				msg.setRecipient("order@tcdining.org"); // or use destination_address from your binding
+				msg.setSubject(`New Item Request: ${item}`);
+				msg.addMessage({
+					contentType: "text/plain",
+					data: `Name: ${name}\nEmail: ${email}\nItem: ${item}\nMessage: ${messageText}`,
 				});
 
-				if (emailResponse.ok) {
-					return new Response('Request sent! Thank you.', {
-						headers: { 'Content-Type': 'text/plain' },
-					});
-				} else {
-					const errText = await emailResponse.text();
-					return new Response(`Failed to send request: ${errText}`, { status: 500 });
-				}
+				// Wrap into EmailMessage and send via binding
+				const emailMessage = new EmailMessage(
+					"noreply@yourdomain.com",
+					"order@tcdining.org",
+					msg.asRaw()
+				);
+
+				await env.SEND_EMAIL.send(emailMessage);
+
+				return new Response('Request sent! Thank you.', {
+					headers: { 'Content-Type': 'text/plain' },
+				});
 			} catch (err) {
 				return new Response(`Error processing request: ${err.message}`, { status: 500 });
 			}
 		}
 
-		// Fallback for unmatched routes
 		return new Response('Not found', { status: 404 });
 	},
 };
