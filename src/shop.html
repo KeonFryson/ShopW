@@ -126,8 +126,6 @@
 		<input type="text" id="itemField" name="item" readonly>
 		<label>Message</label>
 		<textarea name="message" rows="5"></textarea>
-		<label>Attachment (optional, max 1MB)</label>
-		<input type="file" id="attachment" name="attachment" />
 		<button type="submit">Send Request</button>
 	</form>
 	<div id="result" class="text-gray-500"></div>
@@ -153,18 +151,6 @@
 					const formData = new FormData(form);
 					formData.append("access_key", "541c4d15-634c-4668-9767-f1eef2fe9605");
 					formData.append("subject", "New Submission from Web3Forms");
-					const fileInput = document.getElementById("attachment");
-					if (fileInput && fileInput.files.length > 0) {
-						const file = fileInput.files[0];
-						const filesize = file.size / 1024;
-						if (filesize > 1000) {
-							result.innerHTML = "Please upload file less than 1 MB";
-							result.style.display = "block";
-							result.classList.remove("text-green-500", "text-gray-500");
-							result.classList.add("text-red-500");
-							return;
-						}
-					}
 					result.innerHTML = "Please wait...";
 					result.style.display = "block";
 					result.classList.remove("text-green-500", "text-red-500");
