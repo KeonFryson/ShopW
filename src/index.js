@@ -31,7 +31,7 @@ export default {
 				]
 			};
 
-			const emailResponse = await env.SEND_EMAIL.fetch("mailto:order@tcdining.org", {
+			const emailResponse = await env.SEND_EMAIL.fetch("/send", {
 				method: "POST",
 				body: JSON.stringify(emailMessage),
 				headers: { "Content-Type": "application/json" }
