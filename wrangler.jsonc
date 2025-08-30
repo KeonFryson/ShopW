@@ -41,9 +41,6 @@
 
 	// Add this section to allow importing HTML as text
 	"rules": [
-		{
-			"type": "Text",
-			"globs": [ "**/*.html" ]
-		}
+		{ "type": "Text", "globs": ["**/*.html"] }
 	]
 }
