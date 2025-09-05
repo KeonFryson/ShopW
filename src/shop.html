@@ -98,6 +98,38 @@
 		.text-gray-500 {
 			color: gray;
 		}
+		.scrolling-images {
+			width: 100%;
+			overflow: hidden;
+			background: #fff;
+			border-radius: 8px;
+			box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+			margin: 0 auto 24px auto;
+			max-width: 900px;
+		}
+
+		.scrolling-track {
+			display: flex;
+			width: max-content;
+			animation: scrollImages 20s linear infinite;
+		}
+
+		.scrolling-images img {
+			height: 300px;
+			margin: 0 12px;
+			border-radius: 6px;
+			box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+		}
+
+		@keyframes scrollImages {
+			0% {
+				transform: translateX(0);
+			}
+
+			100% {
+				transform: translateX(-50%);
+			}
+		}
 	</style>
 </head>
 
@@ -105,6 +137,18 @@
 
 <body>
 	<h1>TCDining</h1>
+	<!-- Scrolling Images Carousel -->
+	<div class="scrolling-images">
+		<div class="scrolling-track">
+			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
+			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
+			<img src="https://www.marthastewart.com/thmb/uSaztTRX13520w0w-inW35pDZ0s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/MS-312932-bean-burritos-hero-7421-0096cb35178e4650b4b65012e0e7b699.jpg" alt="Food 3">
+			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="Food 4">
+			<!-- Repeat images for seamless loop -->
+			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
+			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
+		</div>
+	</div>
 	<div class="items">
 		<div class="item">
 			<h3>Burrito Plate</h3>
