@@ -51,10 +51,10 @@
 				}
 
 		form {
-			max-width: 400px;
+			max-width: 500px;
 			margin: 40px auto;
 			background: white;
-			padding: 20px;
+			padding: 60px;
 			border-radius: 8px;
 			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 			display: none;
@@ -100,39 +100,89 @@
 		}
 	</style>
 </head>
+
+
+
 <body>
-	<h1>My Shop</h1>
+	<h1>TCDining</h1>
 	<div class="items">
 		<div class="item">
-			<img src="item1.jpg" alt="Item 1">
-			<h3>Item 1</h3>
-			<p>$10 - Cool product description</p>
-			<button onclick="requestItem('Item 1')">Request</button>
+			<h3>Burrito Plate</h3>
+			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
+			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+				<li>Choice of Rice: Cilantro or Spanish</li>
+				<li>Choice of Beans: Black or Refried</li>
+				<li>Pico de Gallo, Guacamole, Cheese</li>
+				<li>Protein: Steak, Chicken, Ground Beef, or Ground Turkey</li>
+				<li>Option to turn your Burrito into a Bowl</li>
+			</ul>
+			<button onclick="requestItem('Burrito Plate')">Request</button>
 		</div>
 		<div class="item">
-			<img src="item2.jpg" alt="Item 2">
-			<h3>Item 2</h3>
-			<p>$20 - Another product description</p>
-			<button onclick="requestItem('Item 2')">Request</button>
+			<h3>Fajita Quesadillas</h3>
+			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
+			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+				<li>Made with Steak, Chicken, Ground Beef, or Ground Turkey</li>
+				<li>Peppers, Onions, & Cheese</li>
+				<li>Served with Garden Salad, Spanish Rice, & a Drink</li>
+			</ul>
+			<button onclick="requestItem('Fajita Quesadillas')">Request</button>
+		</div>
+		<div class="item">
+			<h3>Big Back Taco Salad</h3>
+			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
+			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+				<!--<li>Taco salad with your choice of toppings</li>
+				<li>Includes a Drink</li>-->
+			</ul>
+			<button onclick="requestItem('Big Back Taco Salad')">Request</button>
 		</div>
 	</div>
 	<form id="requestForm" method="POST" novalidate>
 		<h2>Request an Item</h2>
 		<label>Your Name</label>
 		<input type="text" name="name" required>
-		<label>Your Email</label>
-		<input type="email" name="email" required>
-		<label>Requested Item</label>
-		<input type="text" id="itemField" name="item" readonly>
-		<label>Message</label>
+		<label>Your Number</label>
+		<input type="text" name="number" id="numberInput" required pattern="\(\d{3}\) \d{3}-\d{4}" maxlength="14" inputmode="numeric">
+		<label>Requested Items & Quantity</label>
+		<div id="itemQuantities" style="margin-bottom: 16px;">
+			<label>
+				Burrito Plate:
+				<input type="number" id="Burrito_Plate" name="Burrito Plate" min="0" value="0" style="width:60px;">
+			</label><br>
+			<label>
+				Fajita Quesadillas:
+				<input type="number" id="Fajita_Quesadillas" name="Fajita Quesadillas" min="0" value="0" style="width:60px;">
+			</label><br>
+			<label>
+				Big Back Taco Salad:
+				<input type="number" id="Big_Back_Taco_Salad" name="Big Back Taco Salad" min="0" value="0" style="width:60px;">
+			</label>
+		</div>
+		<label>Drink Option</label>
+		<select name="drink" id="drinkOption" required>
+			<option value="">Select a drink</option>
+			<option value="Water">Water</option>
+			<option value="Pepsi">Pepsi</option>
+			<option value="Diet Pepsi">Diet Pepsi</option>
+		</select>
+		<br>
+		<br><label>Message</label>
 		<textarea name="message" rows="5"></textarea>
 		<button type="submit">Send Request</button>
 	</form>
 	<div id="result" class="text-gray-500"></div>
+
 	<script>
 		function requestItem(itemName) {
 			document.getElementById('requestForm').style.display = 'block';
-			document.getElementById('itemField').value = itemName;
+			// Convert itemName to input id format
+			const inputId = itemName.replace(/ /g, "_");
+			const input = document.getElementById(inputId);
+			if (input) {
+				input.value = parseInt(input.value, 10) + 1;
+				input.focus();
+			}
 			window.scrollTo({ top: document.getElementById('requestForm').offsetTop, behavior: 'smooth' });
 		}
 		(function () {
@@ -149,6 +199,18 @@
 					event.preventDefault();
 					event.stopPropagation();
 					const formData = new FormData(form);
+
+					// Collect items with quantity > 0
+					const items = [];
+					document.querySelectorAll('#itemQuantities input[type="number"]').forEach(input => {
+						const qty = parseInt(input.value, 10);
+						if (qty > 0) {
+							items.push(`${input.name} x${qty}`);
+						}
+						formData.delete(input.name); // Remove individual item fields
+					});
+					formData.append("items", items.join(", "));
+
 					formData.append("access_key", "990bc17d-553b-4fa3-8bad-5a7bb35a164e");
 					formData.append("subject", "New Submission from Web3Forms");
 					result.innerHTML = "Please wait...";
@@ -186,6 +248,24 @@
 				}
 				form.classList.add("was-validated");
 			}, false);
+			// --- Phone number formatting ---
+			const numberInput = document.getElementById('numberInput');
+			if (numberInput) {
+				numberInput.addEventListener('input', function (e) {
+					let value = e.target.value.replace(/\D/g, '').slice(0, 10);
+					let formatted = '';
+					if (value.length > 0) {
+						formatted = '(' + value.slice(0, 3);
+					}
+					if (value.length >= 4) {
+						formatted += ') ' + value.slice(3, 6);
+					}
+					if (value.length >= 7) {
+						formatted += '-' + value.slice(6, 10);
+					}
+					e.target.value = formatted;
+				});
+			}
 		})();
 	</script>
 </body>
