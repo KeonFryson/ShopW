@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>My Shop</title>
+	<title>TCDining</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<style>
 		body {
@@ -138,48 +138,50 @@
 <body>
 	<h1>TCDining</h1>
 	<!-- Scrolling Images Carousel -->
-	<div class="scrolling-images">
+	<!--<div class="scrolling-images">
 		<div class="scrolling-track">
 			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
 			<img src="https://www.marthastewart.com/thmb/uSaztTRX13520w0w-inW35pDZ0s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/MS-312932-bean-burritos-hero-7421-0096cb35178e4650b4b65012e0e7b699.jpg" alt="Food 3">
-			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="Food 4">
+			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="Food 4">-->
 			<!-- Repeat images for seamless loop -->
-			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
+			<!--<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
 		</div>
-	</div>
+	</div>-->
 	<div class="items">
 		<div class="item">
-			<h3>Burrito Plate</h3>
+			<h3>Turkey Wings</h3>
 			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
 			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-				<li>Choice of Rice: Cilantro or Spanish</li>
-				<li>Choice of Beans: Black or Refried</li>
-				<li>Pico de Gallo, Guacamole, Cheese</li>
-				<li>Protein: Steak, Chicken, Ground Beef, or Ground Turkey</li>
-				<li>Option to turn your Burrito into a Bowl</li>
+				<li>Baked or Fried</li>
+				<li>Choice of: Cabbage or Green Beans</li>
+				<li>Rice</li>
+				<li>Mac n’ Cheese</li>
+				<li>Roll</li>
 			</ul>
-			<button onclick="requestItem('Burrito Plate')">Request</button>
+			<button onclick="requestItem('Turkey Wings')">Request</button>
 		</div>
 		<div class="item">
-			<h3>Fajita Quesadillas</h3>
-			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
+			<h3>Chicken Plate</h3>
+			<p style="color:#28a745; margin-bottom:8px;">$18 - Includes a Drink</p>
 			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-				<li>Made with Steak, Chicken, Ground Beef, or Ground Turkey</li>
-				<li>Peppers, Onions, & Cheese</li>
-				<li>Served with Garden Salad, Spanish Rice, & a Drink</li>
+				<li>Baked or Fried</li>
+				<li>Choice of: Cabbage or String Beans</li>
+				<li>Rice</li>
+				<li>Mac n’ Cheese</li>
+				<li>Roll</li>
 			</ul>
-			<button onclick="requestItem('Fajita Quesadillas')">Request</button>
+			<button onclick="requestItem('Chicken Plate')">Request</button>
 		</div>
 		<div class="item">
-			<h3>Big Back Taco Salad</h3>
+			<h3>Big Back Chicken Salad</h3>
 			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
 			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-				<!--<li>Taco salad with your choice of toppings</li>
-				<li>Includes a Drink</li>-->
+				<li>Grilled or Fried Chicken</li>
+				<li>Lettuce, Tomato, Cucumber, Olives, Banana Pepper, Cheese</li>
 			</ul>
-			<button onclick="requestItem('Big Back Taco Salad')">Request</button>
+			<button onclick="requestItem('Big Back Chicken Salad')">Request</button>
 		</div>
 	</div>
 	<form id="requestForm" method="POST" novalidate>
@@ -190,17 +192,18 @@
 		<input type="text" name="number" id="numberInput" required pattern="\(\d{3}\) \d{3}-\d{4}" maxlength="14" inputmode="numeric">
 		<label>Requested Items & Quantity</label>
 		<div id="itemQuantities" style="margin-bottom: 16px;">
+			<!-- Add these inside #itemQuantities div in the form, after the existing items -->
 			<label>
-				Burrito Plate:
-				<input type="number" id="Burrito_Plate" name="Burrito Plate" min="0" value="0" style="width:60px;">
+				Turkey Wings:
+				<input type="number" id="Turkey_Wings" name="Turkey Wings" min="0" value="0" style="width:60px;">
 			</label><br>
 			<label>
-				Fajita Quesadillas:
-				<input type="number" id="Fajita_Quesadillas" name="Fajita Quesadillas" min="0" value="0" style="width:60px;">
+				Chicken Plate:
+				<input type="number" id="Chicken_Plate" name="Chicken Plate" min="0" value="0" style="width:60px;">
 			</label><br>
 			<label>
-				Big Back Taco Salad:
-				<input type="number" id="Big_Back_Taco_Salad" name="Big Back Taco Salad" min="0" value="0" style="width:60px;">
+				Big Back Chicken Salad:
+				<input type="number" id="Big_Back_Chicken_Salad" name="Big Back Chicken Salad" min="0" value="0" style="width:60px;">
 			</label>
 		</div>
 		<label>Drink Option</label>
@@ -255,6 +258,13 @@
 						formData.delete(input.name); // Remove individual item fields
 					});
 					formData.append("items", items.join(", "));
+
+					// Add timestamp
+					const now = new Date();
+					const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+					const dateStr = now.toLocaleDateString(undefined, options);
+					const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+					formData.append("timestamp", `${dateStr} ${timeStr}`);
 
 					formData.append("access_key", "990bc17d-553b-4fa3-8bad-5a7bb35a164e");
 					formData.append("subject", "New Submission from Web3Forms");
