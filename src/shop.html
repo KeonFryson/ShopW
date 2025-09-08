@@ -49,42 +49,145 @@
 				.item button:hover {
 					background: #1e7e34;
 				}
-
-		form {
-			max-width: 500px;
-			margin: 40px auto;
-			background: white;
-			padding: 60px;
-			border-radius: 8px;
-			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+		/* Modal styles */
+		.modal {
 			display: none;
-		}
-
-		input, textarea {
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
 			width: 100%;
-			padding: 10px;
-			margin: 8px 0;
-			border: 1px solid #ccc;
-			border-radius: 5px;
+			height: 100%;
+			overflow: auto;
+			background-color: rgba(0,0,0,0.5);
 		}
 
-		button[type="submit"] {
+		.modal-content {
+			background: white;
+			margin: 10% auto;
+			padding: 30px;
+			border-radius: 8px;
+			max-width: 400px;
+			position: relative;
+		}
+
+		.close-btn {
+			position: absolute;
+			right: 15px;
+			top: 10px;
+			font-size: 24px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+
+		label {
+			display: block;
+			margin-top: 10px;
+		}
+
+		select, input[type=number], textarea {
+			width: 100%;
+			padding: 8px;
+			margin-top: 4px;
+			border-radius: 5px;
+			border: 1px solid #ccc;
+		}
+
+		button.submit-item {
+			margin-top: 15px;
 			background: #007BFF;
 			color: white;
 			border: none;
 			padding: 10px 15px;
 			border-radius: 5px;
 			cursor: pointer;
+			width: 100%;
 		}
 
-			button[type="submit"]:hover {
+			button.submit-item:hover {
 				background: #0056b3;
 			}
+		/* Cart styles */
+		#cart {
+			max-width: 600px;
+			margin: 30px auto;
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+		}
+
+			#cart h2 {
+				margin-top: 0;
+			}
+
+		#cart-items {
+			list-style: none;
+			padding-left: 0;
+		}
+
+			#cart-items li {
+				border-bottom: 1px solid #ddd;
+				padding: 10px 0;
+			}
+
+		#checkout-btn {
+			margin-top: 15px;
+			background: #28a745;
+			color: white;
+			border: none;
+			padding: 12px 20px;
+			border-radius: 5px;
+			cursor: pointer;
+			width: 100%;
+		}
+
+			#checkout-btn:hover {
+				background: #1e7e34;
+			}
+		/* Checkout form */
+		#checkout-form {
+			display: none;
+			max-width: 600px;
+			margin: 30px auto;
+			background: white;
+			padding: 30px;
+			border-radius: 8px;
+			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+		}
+
+			#checkout-form label {
+				margin-top: 10px;
+			}
+
+			#checkout-form input, #checkout-form textarea {
+				width: 100%;
+				padding: 8px;
+				margin-top: 4px;
+				border-radius: 5px;
+				border: 1px solid #ccc;
+			}
+
+			#checkout-form button[type="submit"] {
+				margin-top: 15px;
+				background: #007BFF;
+				color: white;
+				border: none;
+				padding: 12px 20px;
+				border-radius: 5px;
+				cursor: pointer;
+				width: 100%;
+			}
+
+				#checkout-form button[type="submit"]:hover {
+					background: #0056b3;
+				}
 
 		#result {
-			margin-top: 1em;
+			max-width: 600px;
+			margin: 30px auto;
 			text-align: center;
-			display: none;
+			font-weight: bold;
 		}
 
 		.text-green-500 {
@@ -95,9 +198,7 @@
 			color: red;
 		}
 
-		.text-gray-500 {
-			color: gray;
-		}
+
 		.scrolling-images {
 			width: 100%;
 			overflow: hidden;
@@ -131,26 +232,6 @@
 			}
 		}
 
-		.item-row {
-			display: flex;
-			align-items: center;
-			gap: 18px;
-			margin-bottom: 12px;
-		}
-
-		.prep-options {
-			display: flex;
-			align-items: center;
-			gap: 16px;
-			margin-bottom: 0;
-		}
-
-			.prep-options label {
-				display: flex;
-				align-items: center;
-				gap: 4px;
-				margin-bottom: 0;
-			}
 	</style>
 </head>
 
@@ -159,19 +240,19 @@
 <body>
 	<h1>TCDining</h1>
 	<!-- Scrolling Images Carousel -->
-	<!--<div class="scrolling-images">
+	<div class="scrolling-images">
 		<div class="scrolling-track">
 			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
 			<img src="https://www.marthastewart.com/thmb/uSaztTRX13520w0w-inW35pDZ0s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/MS-312932-bean-burritos-hero-7421-0096cb35178e4650b4b65012e0e7b699.jpg" alt="Food 3">
-			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="Food 4">-->
-			<!-- Repeat images for seamless loop -->
-			<!--<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
+			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="Food 4">
+	 <!--Repeat images for seamless loop--> 
+	<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
 		</div>
-	</div>-->
+	</div>
 	<div class="items">
-		<div class="item">
+		<div class="item" data-name="Turkey Wings" data-price="15" data-prep-options="Baked,Fried" data-drinks="Water,Sarry,Mountain Dew,Sunkist">
 			<h3>Turkey Wings</h3>
 			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
 			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
@@ -181,9 +262,9 @@
 				<li>Mac n’ Cheese</li>
 				<li>Roll</li>
 			</ul>
-			<button onclick="requestItem('Turkey Wings')">Request</button>
+			<button class="request-btn">Request</button>
 		</div>
-		<div class="item">
+		<div class="item" data-name="Chicken Plate" data-price="18" data-prep-options="Baked,Fried" data-drinks="Water,Sarry,Mountain Dew,Sunkist">
 			<h3>Chicken Plate</h3>
 			<p style="color:#28a745; margin-bottom:8px;">$18 - Includes a Drink</p>
 			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
@@ -193,181 +274,289 @@
 				<li>Mac n’ Cheese</li>
 				<li>Roll</li>
 			</ul>
-			<button onclick="requestItem('Chicken Plate')">Request</button>
+			<button class="request-btn">Request</button>
 		</div>
-		<div class="item">
+		<div class="item" data-name="Big Back Chicken Salad" data-price="15" data-prep-options="Grilled,Fried" data-drinks="Water,Sarry,Mountain Dew,Sunkist">
 			<h3>Big Back Chicken Salad</h3>
 			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
 			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
 				<li>Grilled or Fried Chicken</li>
 				<li>Lettuce, Tomato, Cucumber, Olives, Banana Pepper, Cheese</li>
 			</ul>
-			<button onclick="requestItem('Big Back Chicken Salad')">Request</button>
+			<button class="request-btn">Request</button>
 		</div>
 	</div>
-	<form id="requestForm" method="POST" novalidate>
-		<h2>Request an Item</h2>
-		<label>Your Name</label>
-		<input type="text" name="name" required>
-		<label>Your Number</label>
-		<input type="text" name="number" id="numberInput" required pattern="\(\d{3}\) \d{3}-\d{4}" maxlength="14" inputmode="numeric">
-		<label>Requested Items & Quantity</label>
-		<div class="item-row">
-			<label for="Turkey_Wings" style="min-width:150px;">Turkey Wings:</label>
-			<input type="number" id="Turkey_Wings" name="Turkey Wings" min="0" value="0" style="width:60px;" onchange="togglePrepOptions('Turkey_Wings')">
-			<div id="Turkey_Wings_prep" class="prep-options" style="display:none;">
-				<label><input type="radio" name="Turkey Wings Prep" value="Baked"> Baked</label>
-				<label><input type="radio" name="Turkey Wings Prep" value="Fried"> Fried</label>
-			</div>
+
+	<!-- Modal for item request -->
+	<div id="itemModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+		<div class="modal-content">
+			<span class="close-btn" aria-label="Close modal">&times;</span>
+			<h2 id="modalTitle">Request Item</h2>
+			<form id="itemForm">
+				<div>
+					<strong id="modalItemName"></strong> - $<span id="modalItemPrice"></span>
+				</div>
+				<label for="quantity">Quantity</label>
+				<input type="number" id="quantity" name="quantity" min="1" value="1" required />
+				<label for="prep">Preparation</label>
+				<select id="prep" name="prep" required>
+					<!-- options populated dynamically -->
+				</select>
+				<label for="drink">Drink</label>
+				<select id="drink" name="drink" required>
+					<!-- options populated dynamically -->
+				</select>
+				<label for="specialMessage">Special Message (optional)</label>
+				<textarea id="specialMessage" name="specialMessage" rows="3" placeholder="Any special instructions for this item?"></textarea>
+				<button type="submit" class="submit-item">Add to Cart</button>
+			</form>
 		</div>
-		<div class="item-row">
-			<label for="Chicken_Plate" style="min-width:150px;">Chicken Plate:</label>
-			<input type="number" id="Chicken_Plate" name="Chicken Plate" min="0" value="0" style="width:60px;" onchange="togglePrepOptions('Chicken_Plate')">
-			<div id="Chicken_Plate_prep" class="prep-options" style="display:none;">
-				<label><input type="radio" name="Chicken Plate Prep" value="Baked"> Baked</label>
-				<label><input type="radio" name="Chicken Plate Prep" value="Fried"> Fried</label>
-			</div>
-		</div>
-		<div class="item-row">
-			<label for="Big_Back_Chicken_Salad" style="min-width:150px;">Big Back Chicken Salad:</label>
-			<input type="number" id="Big_Back_Chicken_Salad" name="Big Back Chicken Salad" min="0" value="0" style="width:60px;" onchange="togglePrepOptions('Big_Back_Chicken_Salad')">
-			<div id="Big_Back_Chicken_Salad_prep" class="prep-options" style="display:none;">
-				<label><input type="radio" name="Big Back Chicken Salad Prep" value="Grilled"> Grilled</label>
-				<label><input type="radio" name="Big Back Chicken Salad Prep" value="Fried"> Fried</label>
-			</div>
-		</div>
-		<label>Drink Option</label>
-		<select name="drink" id="drinkOption" required>
-			<option value="">Select a drink</option>
-			<option value="Water">Water</option>
-			<option value="Sarry">Sarry</option>
-			<option value="Mountain Dew">Mountain Dew</option>
-			<option value="Sunkist">Sunkist</option>
-		</select>
-		<br>
-		<br><label>Message</label>
-		<textarea name="message" rows="5"></textarea>
-		<button type="submit">Send Request</button>
+	</div>
+
+	<!-- Cart summary -->
+	<div id="cart" aria-live="polite" aria-atomic="true" aria-relevant="additions removals">
+		<h2>Your Cart</h2>
+		<ul id="cart-items">
+			<li>Your cart is empty.</li>
+		</ul>
+		<button id="checkout-btn" disabled>Checkout</button>
+	</div>
+
+	<!-- Checkout form -->
+	<form id="checkout-form" style="display:none;" novalidate>
+		<h2>Checkout</h2>
+		<label for="customerName">Your Name</label>
+		<input type="text" id="customerName" name="name" required />
+		<label for="customerNumber">Your Number</label>
+		<input type="text" id="customerNumber" name="number" required pattern="\(\d{3}\) \d{3}-\d{4}" maxlength="14" inputmode="numeric" placeholder="(123) 456-7890" />
+		<label for="orderMessage">Additional Message (optional)</label>
+		<textarea id="orderMessage" name="message" rows="4" placeholder="Any additional instructions for your order?"></textarea>
+		<button type="submit">Send Order</button>
 	</form>
-	<div id="result" class="text-gray-500"></div>
+
+	<div id="result"></div>
 
 	<script>
-		function requestItem(itemName) {
-			document.getElementById('requestForm').style.display = 'block';
-			// Convert itemName to input id format
-			const inputId = itemName.replace(/ /g, "_");
-			const input = document.getElementById(inputId);
-			if (input) {
-				input.value = parseInt(input.value, 10) + 1;
-				input.focus();
-				togglePrepOptions(inputId);
-			}
-			window.scrollTo({ top: document.getElementById('requestForm').offsetTop, behavior: 'smooth' });
-		}
+		(() => {
+			const modal = document.getElementById('itemModal');
+			const modalTitle = document.getElementById('modalItemName');
+			const modalPrice = document.getElementById('modalItemPrice');
+			const prepSelect = document.getElementById('prep');
+			const drinkSelect = document.getElementById('drink');
+			const quantityInput = document.getElementById('quantity');
+			const specialMessageInput = document.getElementById('specialMessage');
+			const itemForm = document.getElementById('itemForm');
+			const closeBtn = modal.querySelector('.close-btn');
+			const cartItemsList = document.getElementById('cart-items');
+			const checkoutBtn = document.getElementById('checkout-btn');
+			const checkoutForm = document.getElementById('checkout-form');
+			const resultDiv = document.getElementById('result');
+			const customerNumberInput = document.getElementById('customerNumber');
 
-		function togglePrepOptions(itemId) {
-			const qty = document.getElementById(itemId).value;
-			const prepDiv = document.getElementById(itemId + '_prep');
-			if (parseInt(qty, 10) > 0) {
-				prepDiv.style.display = 'block';
-			} else {
-				prepDiv.style.display = 'none';
-				// Optionally clear selection
-				const radios = prepDiv.querySelectorAll('input[type="radio"]');
-				radios.forEach(r => r.checked = false);
-			}
-		}
+			let currentItem = null;
+			let cart = [];
 
-		(function () {
-			"use strict";
-			const form = document.getElementById("requestForm");
-			const result = document.getElementById("result");
-			form.addEventListener("submit", function (event) {
-				if (!form.checkValidity()) {
-					event.preventDefault();
-					event.stopPropagation();
-					const firstInvalid = form.querySelector(":invalid");
-					if (firstInvalid) firstInvalid.focus();
-				} else {
-					event.preventDefault();
-					event.stopPropagation();
-					const formData = new FormData(form);
-
-					// Collect items with quantity > 0
-					const items = [];
-					document.querySelectorAll('#itemQuantities input[type="number"]').forEach(input => {
-						const qty = parseInt(input.value, 10);
-						if (qty > 0) {
-							items.push(`${input.name} x${qty}`);
-						}
-						formData.delete(input.name); // Remove individual item fields
-					});
-					formData.append("items", items.join(", "));
-
-					// Add timestamp
-					const now = new Date();
-					const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-					const dateStr = now.toLocaleDateString(undefined, options);
-					const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-					formData.append("timestamp", `${dateStr} ${timeStr}`);
-
-					formData.append("access_key", "990bc17d-553b-4fa3-8bad-5a7bb35a164e");
-					formData.append("subject", "New Submission from Web3Forms");
-					result.innerHTML = "Please wait...";
-					result.style.display = "block";
-					result.classList.remove("text-green-500", "text-red-500");
-					result.classList.add("text-gray-500");
-					fetch("https://api.web3forms.com/submit", {
-						method: "POST",
-						body: formData
-					})
-						.then(async (response) => {
-							let json = await response.json();
-							if (response.status == 200) {
-								result.innerHTML = json.message;
-								result.classList.remove("text-gray-500");
-								result.classList.add("text-green-500");
-							} else {
-								result.innerHTML = json.message || "Submission failed.";
-								result.classList.remove("text-gray-500");
-								result.classList.add("text-red-500");
-							}
-						})
-						.catch(() => {
-							result.innerHTML = "Something went wrong!";
-							result.classList.remove("text-gray-500");
-							result.classList.add("text-red-500");
-						})
-						.then(function () {
-							form.reset();
-							form.classList.remove("was-validated");
-							setTimeout(() => {
-								result.style.display = "none";
-							}, 5000);
-						});
+			// Format phone number input on checkout form
+			customerNumberInput.addEventListener('input', e => {
+				let value = e.target.value.replace(/\D/g, '').slice(0, 10);
+				let formatted = '';
+				if (value.length > 0) {
+					formatted = '(' + value.slice(0, 3);
 				}
-				form.classList.add("was-validated");
-			}, false);
-			// --- Phone number formatting ---
-			const numberInput = document.getElementById('numberInput');
-			if (numberInput) {
-				numberInput.addEventListener('input', function (e) {
-					let value = e.target.value.replace(/\D/g, '').slice(0, 10);
-					let formatted = '';
-					if (value.length > 0) {
-						formatted = '(' + value.slice(0, 3);
-					}
-					if (value.length >= 4) {
-						formatted += ') ' + value.slice(3, 6);
-					}
-					if (value.length >= 7) {
-						formatted += '-' + value.slice(6, 10);
-					}
-					e.target.value = formatted;
+				if (value.length >= 4) {
+					formatted += ') ' + value.slice(3, 6);
+				}
+				if (value.length >= 7) {
+					formatted += '-' + value.slice(6, 10);
+				}
+				e.target.value = formatted;
+			});
+
+			// Open modal when clicking request button
+			document.querySelectorAll('.request-btn').forEach(button => {
+				button.addEventListener('click', e => {
+					const itemDiv = e.target.closest('.item');
+					currentItem = {
+						name: itemDiv.dataset.name,
+						price: parseFloat(itemDiv.dataset.price),
+						prepOptions: itemDiv.dataset.prepOptions.split(','),
+						drinks: itemDiv.dataset.drinks.split(',')
+					};
+					openModal(currentItem);
 				});
+			});
+
+			function openModal(item) {
+				modalTitle.textContent = item.name;
+				modalPrice.textContent = item.price.toFixed(2);
+
+				// Populate prep options
+				prepSelect.innerHTML = '';
+				item.prepOptions.forEach(opt => {
+					const option = document.createElement('option');
+					option.value = opt;
+					option.textContent = opt;
+					prepSelect.appendChild(option);
+				});
+
+				// Populate drink options
+				drinkSelect.innerHTML = '';
+				item.drinks.forEach(drink => {
+					const option = document.createElement('option');
+					option.value = drink;
+					option.textContent = drink;
+					drinkSelect.appendChild(option);
+				});
+
+				quantityInput.value = 1;
+				specialMessageInput.value = '';
+
+				modal.style.display = 'block';
+				modal.setAttribute('aria-hidden', 'false');
+				quantityInput.focus();
 			}
 
-			
+			// Close modal
+			closeBtn.addEventListener('click', () => {
+				closeModal();
+			});
+			window.addEventListener('click', e => {
+				if (e.target === modal) {
+					closeModal();
+				}
+			});
+			window.addEventListener('keydown', e => {
+				if (e.key === 'Escape' && modal.style.display === 'block') {
+					closeModal();
+				}
+			});
+
+			function closeModal() {
+				modal.style.display = 'none';
+				modal.setAttribute('aria-hidden', 'true');
+				currentItem = null;
+			}
+
+			// Add item to cart on form submit
+			itemForm.addEventListener('submit', e => {
+				e.preventDefault();
+				if (!itemForm.checkValidity()) {
+					itemForm.reportValidity();
+					return;
+				}
+				const quantity = parseInt(quantityInput.value, 10);
+				const prep = prepSelect.value;
+				const drink = drinkSelect.value;
+				const specialMessage = specialMessageInput.value.trim();
+
+				// Add to cart array
+				cart.push({
+					name: currentItem.name,
+					price: currentItem.price,
+					quantity,
+					prep,
+					drink,
+					specialMessage
+				});
+
+				updateCartUI();
+				closeModal();
+			});
+
+			function updateCartUI() {
+				if (cart.length === 0) {
+					cartItemsList.innerHTML = '<li>Your cart is empty.</li>';
+					checkoutBtn.disabled = true;
+				} else {
+					cartItemsList.innerHTML = '';
+					cart.forEach((item, index) => {
+						const li = document.createElement('li');
+						li.innerHTML = `<strong>${item.name}</strong> x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}<br>
+					Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
+					<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
+						cartItemsList.appendChild(li);
+					});
+					checkoutBtn.disabled = false;
+				}
+			}
+
+			// Remove item from cart
+			cartItemsList.addEventListener('click', e => {
+				if (e.target.classList.contains('remove-btn')) {
+					const idx = parseInt(e.target.dataset.index, 10);
+					if (!isNaN(idx)) {
+						cart.splice(idx, 1);
+						updateCartUI();
+					}
+				}
+			});
+
+			// Show checkout form on checkout button click
+			checkoutBtn.addEventListener('click', () => {
+				checkoutForm.style.display = 'block';
+				checkoutBtn.disabled = true;
+				window.scrollTo({ top: checkoutForm.offsetTop, behavior: 'smooth' });
+			});
+
+			// Handle checkout form submission
+			checkoutForm.addEventListener('submit', e => {
+				e.preventDefault();
+				if (!checkoutForm.checkValidity()) {
+					checkoutForm.reportValidity();
+					return;
+				}
+				if (cart.length === 0) {
+					alert('Your cart is empty.');
+					return;
+				}
+
+				const formData = new FormData(checkoutForm);
+				formData.append('access_key', '990bc17d-553b-4fa3-8bad-5a7bb35a164e');
+				formData.append('subject', 'New Order from TCDining Shop');
+
+				// Add cart items details
+				const itemsDescription = cart.map(item => {
+					return `${item.name} x${item.quantity} (Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `, Note: ${item.specialMessage}` : ''})`;
+				}).join('; ');
+				formData.append('items', itemsDescription);
+
+				// Add timestamp
+				const now = new Date();
+				const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+				const dateStr = now.toLocaleDateString(undefined, options);
+				const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+				formData.append('timestamp', `${dateStr} ${timeStr}`);
+
+				resultDiv.textContent = 'Sending your order...';
+				resultDiv.className = '';
+				fetch('https://api.web3forms.com/submit', {
+					method: 'POST',
+					body: formData
+				})
+					.then(async response => {
+						const json = await response.json();
+						if (response.ok) {
+							resultDiv.textContent = json.message || 'Order sent successfully!';
+							resultDiv.className = 'text-green-500';
+							// Clear cart and form
+							cart = [];
+							updateCartUI();
+							checkoutForm.reset();
+							checkoutForm.style.display = 'none';
+							checkoutBtn.disabled = false;
+						} else {
+							resultDiv.textContent = json.message || 'Failed to send order.';
+							resultDiv.className = 'text-red-500';
+							checkoutBtn.disabled = false
+						}
+					})
+					.catch(() => {
+						resultDiv.textContent = 'Something went wrong while sending your order.';
+						resultDiv.className = 'text-red-500';
+						checkoutBtn.disabled = false;
+					});
+
+			});
 
 		})();
 	</script>
