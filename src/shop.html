@@ -416,16 +416,27 @@
 				modalTitle.textContent = item.name;
 				modalPrice.textContent = item.price.toFixed(2);
 
-				// Populate prep options
-				prepSelect.innerHTML = '';
-				item.prepOptions.forEach(opt => {
-					if (opt) {
-						const option = document.createElement('option');
-						option.value = opt;
-						option.textContent = opt;
-						prepSelect.appendChild(option);
-					}
-				});
+				// Handle prep options
+				const prepLabel = prepSelect.previousElementSibling; // The <label> for prep
+				if (item.prepOptions.length === 0 || (item.prepOptions.length === 1 && item.prepOptions[0] === "")) {
+					prepLabel.style.display = 'none';
+					prepSelect.style.display = 'none';
+					prepSelect.required = false;
+					prepSelect.innerHTML = '';
+				} else {
+					prepLabel.style.display = '';
+					prepSelect.style.display = '';
+					prepSelect.required = true;
+					prepSelect.innerHTML = '';
+					item.prepOptions.forEach(opt => {
+						if (opt) {
+							const option = document.createElement('option');
+							option.value = opt;
+							option.textContent = opt;
+							prepSelect.appendChild(option);
+						}
+					});
+				}
 
 				// Populate drink options
 				drinkSelect.innerHTML = '';
