@@ -246,44 +246,13 @@
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
 			<img src="https://www.marthastewart.com/thmb/uSaztTRX13520w0w-inW35pDZ0s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/MS-312932-bean-burritos-hero-7421-0096cb35178e4650b4b65012e0e7b699.jpg" alt="Food 3">
 			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="Food 4">
-	 <!--Repeat images for seamless loop--> 
-	<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
+			<!--Repeat images for seamless loop-->
+			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" alt="Food 1">
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="Food 2">
 		</div>
 	</div>
-	<div class="items">
-		<div class="item" data-name="Pork Chop Plate" data-price="18" data-prep-options="Baked,Fried,BBQ" data-drinks="Water,Starry,Mountain Dew,Sunkist">
-			<h3>Pork Chop Plate</h3>
-			<p style="color:#28a745; margin-bottom:8px;">$18 - Includes a Drink</p>
-			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-				<li>Your Choice of: Baked / Fried / BBQ Pork Chop</li>
-				<li>Cabbage</li>
-				<li>Mac n’ Cheese</li>
-				<li>Rice</li>
-				<li>Roll</li>
-				<li>Drink</li>
-			</ul>
-			<button class="request-btn">Request</button>
-		</div>
-		<div class="item" data-name="Loaded Chicken Alfredo" data-price="18" data-prep-options="" data-drinks="Water,Starry,Mountain Dew,Sunkist">
-			<h3>Loaded Chicken Alfredo</h3>
-			<p style="color:#28a745; margin-bottom:8px;">$18 - Includes a Drink</p>
-			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-				<li>Made with: Sausage, Bacon, Broccoli, Chicken</li>
-				<li>Served with: Roll, Drink</li>
-			</ul>
-			<button class="request-btn">Request</button>
-		</div>
-		<div class="item" data-name="Big Back Salad" data-price="15" data-prep-options="Ham,Turkey" data-drinks="Water,Starry,Mountain Dew,Sunkist">
-			<h3>Big Back Salad</h3>
-			<p style="color:#28a745; margin-bottom:8px;">$15 - Includes a Drink</p>
-			<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-				<li>Ham or Turkey</li>
-				<li>Made with: Lettuce, Tomato, Cucumber, Olives, Banana Pepper, Cheese</li>
-				<li>Drink</li>
-			</ul>
-			<button class="request-btn">Request</button>
-		</div>
+	<div class="items" id="items-container">
+		<!-- Items will be loaded here -->
 	</div>
 
 	<!-- Modal for item request -->
@@ -334,8 +303,64 @@
 	</form>
 
 	<div id="result"></div>
-
+	<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 	<script>
+		// Fetch and render items from Google Sheets CSV
+		async function fetchAndRenderItems() {
+			const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYo7as43prQyDOMRfUPWkUsTlINw6BWqlkDYpvdwlKaQZg6mEk_iBygLF99swd8QuP3uAKtlVqNv6g/pub?output=csv';
+			const container = document.getElementById('items-container');
+			console.log('[DEBUG] Fetching CSV from:', csvUrl);
+			const response = await fetch(csvUrl);
+			const text = await response.text();
+			console.log('[DEBUG] Raw CSV text:', text.substring(0, 200) + '...');
+
+			// Use PapaParse to parse CSV
+			const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+			console.log('[DEBUG] Parsed CSV:', parsed);
+
+			const items = parsed.data;
+			console.log('[DEBUG] Items array:', items);
+
+			container.innerHTML = '';
+			items.forEach(item => {
+				console.log('[DEBUG] Rendering item:', item);
+				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
+				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
+				const html = `
+					<div class="item"
+						data-name="${item['Name']}"
+						data-price="${item['Price']}"
+						data-prep-options="${prepOptions}"
+						data-drinks="${drinks}">
+						<h3>${item['Name']}</h3>
+						<p style="color:#28a745; margin-bottom:8px;">$${item['Price']} - Includes a Drink</p>
+						<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+							${item['Description'] ? item['Description'].split(',').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+						</ul>
+						<button class="request-btn">Request</button>
+					</div>
+				`;
+				container.insertAdjacentHTML('beforeend', html);
+			});
+
+			// Re-attach event listeners for new buttons
+			document.querySelectorAll('.request-btn').forEach(button => {
+				button.addEventListener('click', e => {
+					const itemDiv = e.target.closest('.item');
+					console.log('[DEBUG] Request button clicked for:', itemDiv.dataset.name);
+					currentItem = {
+						name: itemDiv.dataset.name,
+						price: parseFloat(itemDiv.dataset.price),
+						prepOptions: itemDiv.dataset.prepOptions ? itemDiv.dataset.prepOptions.split(',') : [],
+						drinks: itemDiv.dataset.drinks ? itemDiv.dataset.drinks.split(',') : []
+					};
+					openModal(currentItem);
+				});
+			});
+			console.log('[DEBUG] Event listeners attached to request buttons');
+		}
+
+		// Main shop logic
 		(() => {
 			const modal = document.getElementById('itemModal');
 			const modalTitle = document.getElementById('modalItemName');
@@ -352,7 +377,7 @@
 			const resultDiv = document.getElementById('result');
 			const customerNumberInput = document.getElementById('customerNumber');
 
-			let currentItem = null;
+			window.currentItem = null; // Make accessible for fetchAndRenderItems
 			let cart = [];
 
 			// Format phone number input on checkout form
@@ -371,10 +396,11 @@
 				e.target.value = formatted;
 			});
 
-			// Open modal when clicking request button
+			// Open modal when clicking request button (initially, but replaced by fetchAndRenderItems)
 			document.querySelectorAll('.request-btn').forEach(button => {
 				button.addEventListener('click', e => {
 					const itemDiv = e.target.closest('.item');
+					console.log('[DEBUG] (Initial) Request button clicked for:', itemDiv.dataset.name);
 					currentItem = {
 						name: itemDiv.dataset.name,
 						price: parseFloat(itemDiv.dataset.price),
@@ -385,26 +411,31 @@
 				});
 			});
 
-			function openModal(item) {
+			window.openModal = function (item) {
+				console.log('[DEBUG] Opening modal for item:', item);
 				modalTitle.textContent = item.name;
 				modalPrice.textContent = item.price.toFixed(2);
 
 				// Populate prep options
 				prepSelect.innerHTML = '';
 				item.prepOptions.forEach(opt => {
-					const option = document.createElement('option');
-					option.value = opt;
-					option.textContent = opt;
-					prepSelect.appendChild(option);
+					if (opt) {
+						const option = document.createElement('option');
+						option.value = opt;
+						option.textContent = opt;
+						prepSelect.appendChild(option);
+					}
 				});
 
 				// Populate drink options
 				drinkSelect.innerHTML = '';
 				item.drinks.forEach(drink => {
-					const option = document.createElement('option');
-					option.value = drink;
-					option.textContent = drink;
-					drinkSelect.appendChild(option);
+					if (drink) {
+						const option = document.createElement('option');
+						option.value = drink;
+						option.textContent = drink;
+						drinkSelect.appendChild(option);
+					}
 				});
 
 				quantityInput.value = 1;
@@ -413,24 +444,28 @@
 				modal.style.display = 'block';
 				modal.setAttribute('aria-hidden', 'false');
 				quantityInput.focus();
-			}
+			};
 
 			// Close modal
 			closeBtn.addEventListener('click', () => {
+				console.log('[DEBUG] Modal close button clicked');
 				closeModal();
 			});
 			window.addEventListener('click', e => {
 				if (e.target === modal) {
+					console.log('[DEBUG] Modal background clicked');
 					closeModal();
 				}
 			});
 			window.addEventListener('keydown', e => {
 				if (e.key === 'Escape' && modal.style.display === 'block') {
+					console.log('[DEBUG] Escape key pressed, closing modal');
 					closeModal();
 				}
 			});
 
 			function closeModal() {
+				console.log('[DEBUG] Closing modal');
 				modal.style.display = 'none';
 				modal.setAttribute('aria-hidden', 'true');
 				currentItem = null;
@@ -448,6 +483,15 @@
 				const drink = drinkSelect.value;
 				const specialMessage = specialMessageInput.value.trim();
 
+				console.log('[DEBUG] Adding to cart:', {
+					name: currentItem.name,
+					price: currentItem.price,
+					quantity,
+					prep,
+					drink,
+					specialMessage
+				});
+
 				// Add to cart array
 				cart.push({
 					name: currentItem.name,
@@ -463,6 +507,7 @@
 			});
 
 			function updateCartUI() {
+				console.log('[DEBUG] Updating cart UI. Cart:', cart);
 				if (cart.length === 0) {
 					cartItemsList.innerHTML = '<li>Your cart is empty.</li>';
 					checkoutBtn.disabled = true;
@@ -471,8 +516,8 @@
 					cart.forEach((item, index) => {
 						const li = document.createElement('li');
 						li.innerHTML = `<strong>${item.name}</strong> x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}<br>
-					Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
-					<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
+								Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
+								<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
 						cartItemsList.appendChild(li);
 					});
 					checkoutBtn.disabled = false;
@@ -483,6 +528,7 @@
 			cartItemsList.addEventListener('click', e => {
 				if (e.target.classList.contains('remove-btn')) {
 					const idx = parseInt(e.target.dataset.index, 10);
+					console.log('[DEBUG] Removing item at index:', idx);
 					if (!isNaN(idx)) {
 						cart.splice(idx, 1);
 						updateCartUI();
@@ -492,6 +538,7 @@
 
 			// Show checkout form on checkout button click
 			checkoutBtn.addEventListener('click', () => {
+				console.log('[DEBUG] Checkout button clicked');
 				checkoutForm.style.display = 'block';
 				checkoutBtn.disabled = true;
 				window.scrollTo({ top: checkoutForm.offsetTop, behavior: 'smooth' });
@@ -526,6 +573,8 @@
 				const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 				formData.append('timestamp', `${dateStr} ${timeStr}`);
 
+				console.log('[DEBUG] Submitting order:', Object.fromEntries(formData.entries()));
+
 				resultDiv.textContent = 'Sending your order...';
 				resultDiv.className = '';
 				fetch('https://api.web3forms.com/submit', {
@@ -534,6 +583,7 @@
 				})
 					.then(async response => {
 						const json = await response.json();
+						console.log('[DEBUG] Order submission response:', json);
 						if (response.ok) {
 							resultDiv.textContent = json.message || 'Order sent successfully!';
 							resultDiv.className = 'text-green-500';
@@ -549,15 +599,17 @@
 							checkoutBtn.disabled = false
 						}
 					})
-					.catch(() => {
+					.catch((err) => {
+						console.error('[DEBUG] Order submission error:', err);
 						resultDiv.textContent = 'Something went wrong while sending your order.';
 						resultDiv.className = 'text-red-500';
 						checkoutBtn.disabled = false;
 					});
-
 			});
-
 		})();
+
+		// Load items on page load
+		fetchAndRenderItems();
 	</script>
 </body>
 </html>
