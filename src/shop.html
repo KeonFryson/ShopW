@@ -255,7 +255,7 @@
 		<!-- Items will be loaded here -->
 	</div>
 	<!-- Add this below your main items container -->
-	<h2 style="text-align:center; margin-top:40px;">Desserts & Extras / Tarts</h2>
+	<h2 id="desserts-header" style="text-align:center; margin-top:40px;">Desserts & Extras</h2>
 	<div class="items" id="desserts-container">
 		<!-- Desserts and extras will be loaded here -->
 	</div>
@@ -355,6 +355,13 @@
 					container.insertAdjacentHTML('beforeend', html);
 				}
 			});
+			// At the end of fetchAndRenderItems()
+			const dessertsHeader = document.getElementById('desserts-header');
+			if (dessertsContainer.children.length === 0) {
+				dessertsHeader.style.display = 'none';
+			} else {
+				dessertsHeader.style.display = '';
+			}
 
 			// Re-attach event listeners for new buttons
 			document.querySelectorAll('.request-btn').forEach(button => {
