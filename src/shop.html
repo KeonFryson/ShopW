@@ -343,7 +343,7 @@
 				<h3>${item['Name']}</h3>
 				<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
 				<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-					${item['Description'] ? item['Description'].split(',').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+					${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
 				</ul>
 				<button class="request-btn">Request</button>
 			</div>
