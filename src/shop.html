@@ -314,6 +314,7 @@
 		async function fetchAndRenderItems() {
 			const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYo7as43prQyDOMRfUPWkUsTlINw6BWqlkDYpvdwlKaQZg6mEk_iBygLF99swd8QuP3uAKtlVqNv6g/pub?output=csv';
 			const container = document.getElementById('items-container');
+			const dessertsContainer = document.getElementById('desserts-container'); // <-- Add this line
 			console.log('[DEBUG] Fetching CSV from:', csvUrl);
 			const response = await fetch(csvUrl);
 			const text = await response.text();
@@ -327,25 +328,26 @@
 			console.log('[DEBUG] Items array:', items);
 
 			container.innerHTML = '';
+			dessertsContainer.innerHTML = ''; // Clear previous
+
 			items.forEach(item => {
 				console.log('[DEBUG] Rendering item:', item);
 				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
 				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
 				const html = `
-						<div class="item"
-							data-name="${item['Name']}"
-							data-price="${item['Price']}"
-							data-prep-options="${prepOptions}"
-							data-drinks="${drinks}">
-							<h3>${item['Name']}</h3>
-							<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
-							<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-								${item['Description'] ? item['Description'].split(',').map(line => `<li>${line.trim()}</li>`).join('') : ''}
-							</ul>
-							<button class="request-btn">Request</button>
-						</div>
-					`;
-				// Check for category (Dessert, Extra, Tart)
+			<div class="item"
+				data-name="${item['Name']}"
+				data-price="${item['Price']}"
+				data-prep-options="${prepOptions}"
+				data-drinks="${drinks}">
+				<h3>${item['Name']}</h3>
+				<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
+				<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+					${item['Description'] ? item['Description'].split(',').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+				</ul>
+				<button class="request-btn">Request</button>
+			</div>
+		`;
 				const category = (item['Category'] || '').toLowerCase();
 				if (category.includes('dessert') || category.includes('extra') || category.includes('tart')) {
 					dessertsContainer.insertAdjacentHTML('beforeend', html);
