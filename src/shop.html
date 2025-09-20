@@ -333,7 +333,7 @@
 			items.forEach(item => {
 				console.log('[DEBUG] Rendering item:', item);
 				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
-				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
+				const drinks = item['Drinks'] ? item['Drinks'].split('_').map(s => s.trim()).join(',') : '';
 				const html = `
 			<div class="item"
 				data-name="${item['Name']}"
