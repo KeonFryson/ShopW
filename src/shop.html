@@ -9,7 +9,7 @@
 			font-family: Arial, sans-serif;
 			margin: 0;
 			padding: 20px;
-			background: #f9f9f9;
+			background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
 		}
 
 		h1 {
@@ -24,10 +24,10 @@
 		}
 
 		.item {
-			background: white;
+			background: linear-gradient(135deg, #f3f6fa 0%, #e9ecef 100%);
 			padding: 15px;
 			border-radius: 8px;
-			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 			text-align: center;
 		}
 
@@ -63,7 +63,7 @@
 		}
 
 		.modal-content {
-			background: white;
+			background: linear-gradient(135deg, #f3f6fa 0%, #e9ecef 100%);
 			margin: 10% auto;
 			padding: 30px;
 			border-radius: 8px;
@@ -111,10 +111,10 @@
 		#cart {
 			max-width: 600px;
 			margin: 30px auto;
-			background: white;
+			background: linear-gradient(135deg, #f3f6fa 0%, #e9ecef 100%);
 			padding: 20px;
 			border-radius: 8px;
-			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 		}
 
 			#cart h2 {
@@ -150,10 +150,10 @@
 			display: none;
 			max-width: 600px;
 			margin: 30px auto;
-			background: white;
+			background: linear-gradient(135deg, #f3f6fa 0%, #e9ecef 100%);
 			padding: 30px;
 			border-radius: 8px;
-			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 		}
 
 			#checkout-form label {
@@ -202,7 +202,7 @@
 		.scrolling-images {
 			width: 100%;
 			overflow: hidden;
-			background: #fff;
+			background: linear-gradient(135deg, #f3f6fa 0%, #e9ecef 100%);
 			border-radius: 8px;
 			box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 			margin: 0 auto 24px auto;
@@ -231,7 +231,6 @@
 				transform: translateX(-50%);
 			}
 		}
-
 	</style>
 </head>
 
@@ -335,19 +334,19 @@
 				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
 				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
 				const html = `
-			<div class="item"
-				data-name="${item['Name']}"
-				data-price="${item['Price']}"
-				data-prep-options="${prepOptions}"
-				data-drinks="${drinks}">
-				<h3>${item['Name']}</h3>
-				<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
-				<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-					${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
-				</ul>
-				<button class="request-btn">Request</button>
-			</div>
-		`;
+				<div class="item"
+					data-name="${item['Name']}"
+					data-price="${item['Price']}"
+					data-prep-options="${prepOptions}"
+					data-drinks="${drinks}">
+					<h3>${item['Name']}</h3>
+					<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
+					<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+						${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+					</ul>
+					<button class="request-btn">Request</button>
+				</div>
+			`;
 				const category = (item['Category'] || '').toLowerCase();
 				if (category.includes('dessert') || category.includes('extra') || category.includes('tart')) {
 					dessertsContainer.insertAdjacentHTML('beforeend', html);
@@ -547,8 +546,8 @@
 					cart.forEach((item, index) => {
 						const li = document.createElement('li');
 						li.innerHTML = `<strong>${item.name}</strong> x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}<br>
-									Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
-									<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
+										Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
+										<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
 						cartItemsList.appendChild(li);
 					});
 					checkoutBtn.disabled = false;
