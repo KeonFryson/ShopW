@@ -309,44 +309,72 @@
 	<div id="result"></div>
 	<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 	<script>
-		// Fetch and render items from Google Sheets CSV
+		// Sheet GIDs
+		const saturdayGid = '690071597';
+		const tuesdayGid = '134704547';
+		const baseUrl = 'https://docs.google.com/spreadsheets/d/16fTxHCLzN2vNP1uPzc4CVgK6HYFGvONlP6C8tk4UzgE/export?format=csv&gid=';
+
+		function getNextDayOfWeek(dayOfWeek) {
+			const now = new Date();
+			const result = new Date(now);
+			result.setHours(0, 0, 0, 0);
+			const diff = (dayOfWeek + 7 - now.getDay()) % 7;
+			result.setDate(now.getDate() + (diff === 0 ? 7 : diff));
+			return result;
+		}
+
+		function daysUntil(date) {
+			const now = new Date();
+			const oneDay = 24 * 60 * 60 * 1000;
+			const diff = Math.ceil((date - now) / oneDay);
+			return diff;
+		}
+
 		async function fetchAndRenderItems() {
-			const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYo7as43prQyDOMRfUPWkUsTlINw6BWqlkDYpvdwlKaQZg6mEk_iBygLF99swd8QuP3uAKtlVqNv6g/pub?output=csv';
+			const nextSaturday = getNextDayOfWeek(0); // 0 = Saturday
+			const nextTuesday = getNextDayOfWeek(2); // 2 = Tuesday
+			const daysToSaturday = daysUntil(nextSaturday);
+			const daysToTuesday = daysUntil(nextTuesday);
+
+			let csvUrl, menuLabel;
+			if (daysToSaturday <= 7 && (daysToSaturday <= daysToTuesday || daysToTuesday > 7)) {
+				csvUrl = `${baseUrl}${saturdayGid}`;
+				menuLabel = "Saturday Menu";
+			} else if (daysToTuesday <= 7) {
+				csvUrl = `${baseUrl}${tuesdayGid}`;
+				menuLabel = "Tuesday Menu";
+			} else {
+				csvUrl = `${baseUrl}${saturdayGid}`;
+				menuLabel = "Saturday Menu";
+			}
+
+			document.getElementById('items-container').innerHTML = `<h2 style="grid-column:1/-1;text-align:center;">${menuLabel}</h2>`;
 			const container = document.getElementById('items-container');
-			const dessertsContainer = document.getElementById('desserts-container'); // <-- Add this line
-			console.log('[DEBUG] Fetching CSV from:', csvUrl);
+			const dessertsContainer = document.getElementById('desserts-container');
+			dessertsContainer.innerHTML = '';
+
 			const response = await fetch(csvUrl);
 			const text = await response.text();
-			console.log('[DEBUG] Raw CSV text:', text.substring(0, 200) + '...');
-
-			// Use PapaParse to parse CSV
 			const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-			console.log('[DEBUG] Parsed CSV:', parsed);
-
 			const items = parsed.data;
-			console.log('[DEBUG] Items array:', items);
-
-			container.innerHTML = '';
-			dessertsContainer.innerHTML = ''; // Clear previous
 
 			items.forEach(item => {
-				console.log('[DEBUG] Rendering item:', item);
 				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
 				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
 				const html = `
-				<div class="item"
-					data-name="${item['Name']}"
-					data-price="${item['Price']}"
-					data-prep-options="${prepOptions}"
-					data-drinks="${drinks}">
-					<h3>${item['Name']}</h3>
-					<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
-					<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-						${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
-					</ul>
-					<button class="request-btn">Request</button>
-				</div>
-			`;
+					<div class="item"
+						data-name="${item['Name']}"
+						data-price="${item['Price']}"
+						data-prep-options="${prepOptions}"
+						data-drinks="${drinks}">
+						<h3>${item['Name']}</h3>
+						<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
+						<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+							${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+						</ul>
+						<button class="request-btn">Request</button>
+					</div>
+				`;
 				const category = (item['Category'] || '').toLowerCase();
 				if (category.includes('dessert') || category.includes('extra') || category.includes('tart')) {
 					dessertsContainer.insertAdjacentHTML('beforeend', html);
@@ -354,19 +382,13 @@
 					container.insertAdjacentHTML('beforeend', html);
 				}
 			});
-			// At the end of fetchAndRenderItems()
-			const dessertsHeader = document.getElementById('desserts-header');
-			if (dessertsContainer.children.length === 0) {
-				dessertsHeader.style.display = 'none';
-			} else {
-				dessertsHeader.style.display = '';
-			}
 
-			// Re-attach event listeners for new buttons
+			const dessertsHeader = document.getElementById('desserts-header');
+			dessertsHeader.style.display = dessertsContainer.children.length === 0 ? 'none' : '';
+
 			document.querySelectorAll('.request-btn').forEach(button => {
 				button.addEventListener('click', e => {
 					const itemDiv = e.target.closest('.item');
-					console.log('[DEBUG] Request button clicked for:', itemDiv.dataset.name);
 					currentItem = {
 						name: itemDiv.dataset.name,
 						price: parseFloat(itemDiv.dataset.price),
@@ -376,8 +398,11 @@
 					openModal(currentItem);
 				});
 			});
-			console.log('[DEBUG] Event listeners attached to request buttons');
 		}
+
+		// Load items on page load
+		fetchAndRenderItems();
+	</script>
 
 		// Main shop logic
 		(() => {
