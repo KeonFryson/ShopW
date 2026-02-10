@@ -291,6 +291,8 @@
 		<ul id="cart-items">
 			<li>Your cart is empty.</li>
 		</ul>
+		<div id="cart-total" style="text-align:right;font-weight:bold;margin-top:8px;">Total: $0.00</div>
+		<button id="clear-cart-btn" style="margin-top:10px;background:#ffc107;color:#333;border:none;padding:8px 12px;border-radius:5px;cursor:pointer;width:100%;">Clear Cart</button>
 		<button id="checkout-btn" disabled>Checkout</button>
 	</div>
 
@@ -454,6 +456,8 @@
 			const itemForm = document.getElementById('itemForm');
 			const closeBtn = modal.querySelector('.close-btn');
 			const cartItemsList = document.getElementById('cart-items');
+			const cartTotalDiv = document.getElementById('cart-total');
+			const clearCartBtn = document.getElementById('clear-cart-btn');
 			const checkoutBtn = document.getElementById('checkout-btn');
 			const checkoutForm = document.getElementById('checkout-form');
 			const resultDiv = document.getElementById('result');
@@ -478,23 +482,7 @@
 				e.target.value = formatted;
 			});
 
-			// Open modal when clicking request button (initially, but replaced by fetchAndRenderItems)
-			document.querySelectorAll('.request-btn').forEach(button => {
-				button.addEventListener('click', e => {
-					const itemDiv = e.target.closest('.item');
-					console.log('[DEBUG] (Initial) Request button clicked for:', itemDiv.dataset.name);
-					currentItem = {
-						name: itemDiv.dataset.name,
-						price: parseFloat(itemDiv.dataset.price),
-						prepOptions: itemDiv.dataset.prepOptions.split(','),
-						drinks: itemDiv.dataset.drinks.split(',')
-					};
-					openModal(currentItem);
-				});
-			});
-
 			window.openModal = function (item) {
-				console.log('[DEBUG] Opening modal for item:', item);
 				modalTitle.textContent = item.name;
 				modalPrice.textContent = item.price.toFixed(2);
 
@@ -537,32 +525,42 @@
 				modal.style.display = 'block';
 				modal.setAttribute('aria-hidden', 'false');
 				quantityInput.focus();
+				// Trap focus inside modal
+				const focusableEls = modal.querySelectorAll('input,select,textarea,button,.close-btn');
+				const firstEl = focusableEls[0];
+				const lastEl = focusableEls[focusableEls.length - 1];
+				modal.addEventListener('keydown', trapFocus);
+				function trapFocus(e) {
+					if (e.key !== 'Tab') return;
+					if (e.shiftKey) {
+						if (document.activeElement === firstEl) {
+							e.preventDefault();
+							lastEl.focus();
+						}
+					} else {
+						if (document.activeElement === lastEl) {
+							e.preventDefault();
+							firstEl.focus();
+						}
+					}
+				}
+				modal._trapFocus = trapFocus;
 			};
 
-			// Close modal
-			closeBtn.addEventListener('click', () => {
-				console.log('[DEBUG] Modal close button clicked');
-				closeModal();
-			});
-			window.addEventListener('click', e => {
-				if (e.target === modal) {
-					console.log('[DEBUG] Modal background clicked');
-					closeModal();
-				}
-			});
-			window.addEventListener('keydown', e => {
-				if (e.key === 'Escape' && modal.style.display === 'block') {
-					console.log('[DEBUG] Escape key pressed, closing modal');
-					closeModal();
-				}
-			});
-
 			function closeModal() {
-				console.log('[DEBUG] Closing modal');
 				modal.style.display = 'none';
 				modal.setAttribute('aria-hidden', 'true');
 				currentItem = null;
+				modal.removeEventListener('keydown', modal._trapFocus);
 			}
+
+			closeBtn.addEventListener('click', closeModal);
+			window.addEventListener('click', e => {
+				if (e.target === modal) closeModal();
+			});
+			window.addEventListener('keydown', e => {
+				if (e.key === 'Escape' && modal.style.display === 'block') closeModal();
+			});
 
 			// Add item to cart on form submit
 			itemForm.addEventListener('submit', e => {
@@ -575,45 +573,31 @@
 				const prep = prepSelect.value;
 				const drink = drinkSelect.value;
 				const specialMessage = specialMessageInput.value.trim();
-
-				console.log('[DEBUG] Adding to cart:', {
-					name: currentItem.name,
-					price: currentItem.price,
-					quantity,
-					prep,
-					drink,
-					specialMessage
-				});
-
-				// Add to cart array
-				cart.push({
-					name: currentItem.name,
-					price: currentItem.price,
-					quantity,
-					prep,
-					drink,
-					specialMessage
-				});
-
+				cart.push({ name: currentItem.name, price: currentItem.price, quantity, prep, drink, specialMessage });
 				updateCartUI();
 				closeModal();
 			});
 
 			function updateCartUI() {
-				console.log('[DEBUG] Updating cart UI. Cart:', cart);
 				if (cart.length === 0) {
 					cartItemsList.innerHTML = '<li>Your cart is empty.</li>';
+					cartTotalDiv.textContent = 'Total: $0.00';
 					checkoutBtn.disabled = true;
+					clearCartBtn.disabled = true;
 				} else {
 					cartItemsList.innerHTML = '';
+					let total = 0;
 					cart.forEach((item, index) => {
+						total += item.price * item.quantity;
 						const li = document.createElement('li');
 						li.innerHTML = `<strong>${item.name}</strong> x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}<br>
-											Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
-											<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
+										Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
+										<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
 						cartItemsList.appendChild(li);
 					});
+					cartTotalDiv.textContent = `Total: $${total.toFixed(2)}`;
 					checkoutBtn.disabled = false;
+					clearCartBtn.disabled = false;
 				}
 			}
 
@@ -621,7 +605,6 @@
 			cartItemsList.addEventListener('click', e => {
 				if (e.target.classList.contains('remove-btn')) {
 					const idx = parseInt(e.target.dataset.index, 10);
-					console.log('[DEBUG] Removing item at index:', idx);
 					if (!isNaN(idx)) {
 						cart.splice(idx, 1);
 						updateCartUI();
@@ -629,9 +612,14 @@
 				}
 			});
 
+			// Clear cart button
+			clearCartBtn.addEventListener('click', () => {
+				cart = [];
+				updateCartUI();
+			});
+
 			// Show checkout form on checkout button click
 			checkoutBtn.addEventListener('click', () => {
-				console.log('[DEBUG] Checkout button clicked');
 				checkoutForm.style.display = 'block';
 				checkoutBtn.disabled = true;
 				window.scrollTo({ top: checkoutForm.offsetTop, behavior: 'smooth' });
@@ -648,39 +636,30 @@
 					alert('Your cart is empty.');
 					return;
 				}
-
 				const formData = new FormData(checkoutForm);
 				formData.append('access_key', 'ed17f9c9-0993-4f9e-9176-1a9a1ea776f8');
 				formData.append('subject', 'New Order from TCDining Shop');
-
-				// Add cart items details
 				const itemsDescription = cart.map(item => {
 					return `${item.name} x${item.quantity} (Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `, Note: ${item.specialMessage}` : ''})`;
 				}).join('; ');
 				formData.append('items', itemsDescription);
-
-				// Add timestamp
 				const now = new Date();
 				const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 				const dateStr = now.toLocaleDateString(undefined, options);
 				const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 				formData.append('timestamp', `${dateStr} ${timeStr}`);
-
-				console.log('[DEBUG] Submitting order:', Object.fromEntries(formData.entries()));
-
 				resultDiv.textContent = 'Sending your order...';
 				resultDiv.className = '';
+				resultDiv.setAttribute('aria-live', 'polite');
 				fetch('https://api.web3forms.com/submit', {
 					method: 'POST',
 					body: formData
 				})
 					.then(async response => {
 						const json = await response.json();
-						console.log('[DEBUG] Order submission response:', json);
 						if (response.ok) {
 							resultDiv.textContent = json.message || 'Order sent successfully!';
 							resultDiv.className = 'text-green-500';
-							// Clear cart and form
 							cart = [];
 							updateCartUI();
 							checkoutForm.reset();
@@ -693,7 +672,6 @@
 						}
 					})
 					.catch((err) => {
-						console.error('[DEBUG] Order submission error:', err);
 						resultDiv.textContent = 'Something went wrong while sending your order.';
 						resultDiv.className = 'text-red-500';
 						checkoutBtn.disabled = false;
