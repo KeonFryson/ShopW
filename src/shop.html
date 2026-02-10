@@ -335,19 +335,29 @@
 		}
 
 		async function fetchAndRenderItems() {
-			const nextSaturday = getNextDayOfWeek(0); // 0 = Saturday
-			const nextTuesday = getNextDayOfWeek(2); // 2 = Tuesday
-			const daysToSaturday = daysUntil(nextSaturday);
-			const daysToTuesday = daysUntil(nextTuesday);
+			// Map day numbers to GIDs and labels
+			const dayConfigs = [
+				{ day: 0, gid: '690071597', label: 'Saturday Menu' },
+				{ day: 1, gid: '0', label: 'Monday Menu' },
+				{ day: 2, gid: '134704547', label: 'Tuesday Menu' },
+				{ day: 3, gid: '371970756', label: 'Wednesday Menu' },
+				{ day: 4, gid: '2056320692', label: 'Thursday Menu' },
+				{ day: 5, gid: '2132732111', label: 'Friday Menu' },
+				{ day: 6, gid: '471921827', label: 'Sunday Menu' }
+			];
+
+			const now = new Date();
+			const today = now.getDay();
+
+			// Find config for today
+			const todayConfig = dayConfigs.find(cfg => cfg.day === today);
 
 			let csvUrl, menuLabel;
-			if (daysToSaturday <= 7 && (daysToSaturday <= daysToTuesday || daysToTuesday > 7)) {
-				csvUrl = `${baseUrl}${saturdayGid}`;
-				menuLabel = "Saturday Menu";
-			} else if (daysToTuesday <= 7) {
-				csvUrl = `${baseUrl}${tuesdayGid}`;
-				menuLabel = "Tuesday Menu";
+			if (todayConfig) {
+				csvUrl = `${baseUrl}${todayConfig.gid}`;
+				menuLabel = todayConfig.label;
 			} else {
+				// Fallback to Saturday
 				csvUrl = `${baseUrl}${saturdayGid}`;
 				menuLabel = "Saturday Menu";
 			}
