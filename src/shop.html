@@ -22,7 +22,6 @@
 			gap: 20px;
 			margin: 20px 0;
 			justify-content: center;
-			/* Remove place-items: center; */
 			max-width: 900px;
 			margin-left: auto;
 			margin-right: auto;
@@ -203,7 +202,6 @@
 			color: red;
 		}
 
-
 		.scrolling-images {
 			width: 100%;
 			overflow: hidden;
@@ -239,8 +237,6 @@
 	</style>
 </head>
 
-
-
 <body>
 	<h1>TCDining</h1>
 	<!-- Scrolling Images Carousel -->
@@ -258,7 +254,6 @@
 	<div class="items" id="items-container">
 		<!-- Items will be loaded here -->
 	</div>
-	<!-- Add this below your main items container -->
 	<h2 id="desserts-header" style="text-align:center; margin-top:40px;">Desserts & Extras</h2>
 	<div class="items" id="desserts-container">
 		<!-- Desserts and extras will be loaded here -->
@@ -318,24 +313,22 @@
 		const tuesdayGid = '134704547';
 		const baseUrl = 'https://docs.google.com/spreadsheets/d/16fTxHCLzN2vNP1uPzc4CVgK6HYFGvONlP6C8tk4UzgE/export?format=csv&gid=';
 
-		function getNextDayOfWeek(dayOfWeek) {
-			const now = new Date();
-			const result = new Date(now);
-			result.setHours(0, 0, 0, 0);
-			const diff = (dayOfWeek + 7 - now.getDay()) % 7;
-			result.setDate(now.getDate() + (diff === 0 ? 7 : diff));
-			return result;
-		}
-
-		function daysUntil(date) {
-			const now = new Date();
-			const oneDay = 24 * 60 * 60 * 1000;
-			const diff = Math.ceil((date - now) / oneDay);
-			return diff;
-		}
+		// Show a loading overlay before content is ready
+		const loadingOverlay = document.createElement('div');
+		loadingOverlay.style.position = 'fixed';
+		loadingOverlay.style.top = 0;
+		loadingOverlay.style.left = 0;
+		loadingOverlay.style.width = '100vw';
+		loadingOverlay.style.height = '100vh';
+		loadingOverlay.style.background = 'rgba(255,255,255,0.85)';
+		loadingOverlay.style.zIndex = 2000;
+		loadingOverlay.style.display = 'flex';
+		loadingOverlay.style.alignItems = 'center';
+		loadingOverlay.style.justifyContent = 'center';
+		loadingOverlay.innerHTML = '<div style="font-size:2rem;color:#007BFF;">Loading menu...</div>';
+		document.body.appendChild(loadingOverlay);
 
 		async function fetchAndRenderItems() {
-			// Map day numbers to GIDs and labels
 			const dayConfigs = [
 				{ day: 0, gid: '690071597', label: 'Saturday Menu' },
 				{ day: 1, gid: '0', label: 'Monday Menu' },
@@ -350,8 +343,14 @@
 			const dessertsContainer = document.getElementById('desserts-container');
 			const dessertsHeader = document.getElementById('desserts-header');
 
-			async function tryDay(dayIndex) {
-				const config = dayConfigs[dayIndex];
+			const today = new Date().getDay();
+			const orderedDays = [];
+			for (let i = 0; i < 7; i++) {
+				orderedDays.push(dayConfigs[(today + i) % 7]);
+			}
+
+			// Fetch all menus in parallel
+			const fetches = orderedDays.map(async config => {
 				const csvUrl = `${baseUrl}${config.gid}`;
 				const response = await fetch(csvUrl);
 				const text = await response.text();
@@ -371,23 +370,10 @@
 				});
 
 				return { mainItems, dessertItems, label: config.label };
-			}
+			});
 
-			let today = new Date().getDay();
-			let checked = 0;
-			let found = false;
-			let result = null;
-
-			// Try today, then next day, up to 7 days
-			while (checked < 7 && !found) {
-				const dayIndex = (today + checked) % 7;
-				result = await tryDay(dayIndex);
-				if (result.mainItems.length > 0) {
-					found = true;
-				} else {
-					checked++;
-				}
-			}
+			const results = await Promise.all(fetches);
+			const result = results.find(r => r.mainItems.length > 0) || results[0];
 
 			// Render
 			itemsContainer.innerHTML = `<h2 style="grid-column:1/-1;text-align:center;">${result.label}</h2>`;
@@ -397,19 +383,19 @@
 				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
 				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
 				const html = `
-					<div class="item"
-						data-name="${item['Name']}"
-						data-price="${item['Price']}"
-						data-prep-options="${prepOptions}"
-						data-drinks="${drinks}">
-						<h3>${item['Name']}</h3>
-						<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
-						<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-							${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
-						</ul>
-						<button class="request-btn">Request</button>
-					</div>
-				`;
+						<div class="item"
+							data-name="${item['Name']}"
+							data-price="${item['Price']}"
+							data-prep-options="${prepOptions}"
+							data-drinks="${drinks}">
+							<h3>${item['Name']}</h3>
+							<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
+							<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+								${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+							</ul>
+							<button class="request-btn">Request</button>
+						</div>
+					`;
 				itemsContainer.insertAdjacentHTML('beforeend', html);
 			});
 
@@ -417,19 +403,19 @@
 				const prepOptions = item['Prep Options'] ? item['Prep Options'].split(',').map(s => s.trim()).join(',') : '';
 				const drinks = item['Drinks'] ? item['Drinks'].split(',').map(s => s.trim()).join(',') : '';
 				const html = `
-					<div class="item"
-						data-name="${item['Name']}"
-						data-price="${item['Price']}"
-						data-prep-options="${prepOptions}"
-						data-drinks="${drinks}">
-						<h3>${item['Name']}</h3>
-						<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
-						<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
-							${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
-						</ul>
-						<button class="request-btn">Request</button>
-					</div>
-				`;
+						<div class="item"
+							data-name="${item['Name']}"
+							data-price="${item['Price']}"
+							data-prep-options="${prepOptions}"
+							data-drinks="${drinks}">
+							<h3>${item['Name']}</h3>
+							<p style="color:#28a745; margin-bottom:8px;">$${item['Price']}</p>
+							<ul style="text-align:left; margin:0 auto 10px auto; max-width:250px; padding-left:20px;">
+								${item['Description'] ? item['Description'].split('_').map(line => `<li>${line.trim()}</li>`).join('') : ''}
+							</ul>
+							<button class="request-btn">Request</button>
+						</div>
+					`;
 				dessertsContainer.insertAdjacentHTML('beforeend', html);
 			});
 
@@ -447,9 +433,14 @@
 					openModal(currentItem);
 				});
 			});
+
+			// Hide loading overlay after menu is ready
+			loadingOverlay.remove();
 		}
 
-	
+		window.addEventListener('DOMContentLoaded', () => {
+			fetchAndRenderItems();
+		});
 
 		// Main shop logic
 		(() => {
@@ -618,8 +609,8 @@
 					cart.forEach((item, index) => {
 						const li = document.createElement('li');
 						li.innerHTML = `<strong>${item.name}</strong> x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}<br>
-										Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
-										<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
+											Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? `<br>Note: ${item.specialMessage}` : ''}
+											<br><button aria-label="Remove ${item.name} from cart" data-index="${index}" class="remove-btn" style="margin-top:5px; background:#dc3545; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Remove</button>`;
 						cartItemsList.appendChild(li);
 					});
 					checkoutBtn.disabled = false;
@@ -709,9 +700,6 @@
 					});
 			});
 		})();
-
-		// Load items on page load
-		fetchAndRenderItems();
 	</script>
 </body>
 </html>
