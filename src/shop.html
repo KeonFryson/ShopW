@@ -154,7 +154,7 @@
 			}
 
 			100% {
-				transform: translateX(-50%);
+				transform: translateX(var(--scroll-dist, -50%));
 			}
 		}
 
@@ -734,6 +734,8 @@
 			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="">
 			<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80" alt="">
 			<img src="https://static01.nyt.com/images/2024/01/10/multimedia/AS-Burrito-vzhk/AS-Burrito-vzhk-mediumSquareAt3X.jpg" alt="">
+			<img src="https://www.marthastewart.com/thmb/uSaztTRX13520w0w-inW35pDZ0s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/MS-312932-bean-burritos-hero-7421-0096cb35178e4650b4b65012e0e7b699.jpg" alt="">
+			<img src="https://www.allrecipes.com/thmb/w2WekH0XGb0pxsj0qAXwvFdSwR0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/14041-delicious-black-bean-burritos-ddmfs-3x2-008-7fbf871b145f4f35a45650ee903fce73.jpg" alt="">
 		</div>
 		<div class="hero-overlay">
 			<div class="hero-label">Fresh Today</div>
@@ -1077,7 +1079,24 @@
 				});
 		});
 
-		window.addEventListener('DOMContentLoaded', fetchAndRenderItems);
+		window.addEventListener('DOMContentLoaded', () => {
+			fetchAndRenderItems();
+			// Fix seamless carousel: measure exact half-width of track
+			const track = document.getElementById('scrolling-track');
+			function setScrollDist() {
+				const imgs = track.querySelectorAll('img');
+				const half = imgs.length / 2;
+				let w = 0;
+				for (let i = 0; i < half; i++) w += imgs[i].offsetWidth + 4; // 4px = margin
+				track.style.setProperty('--scroll-dist', `-${w}px`);
+				track.parentElement.style.setProperty('--scroll-dist', `-${w}px`);
+				document.documentElement.style.setProperty('--scroll-dist', `-${w}px`);
+			}
+			// Wait for images to load then measure
+			Promise.all(Array.from(track.querySelectorAll('img')).map(img =>
+				img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
+			)).then(setScrollDist);
+		});
 	</script>
 </body>
 </html>
