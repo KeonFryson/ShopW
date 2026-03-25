@@ -622,17 +622,18 @@
               <div class="card-items">${itemsHtml}</div>
               ${notesHtml}
               <div class="card-footer">
-                <div>
-                  <div class="order-total">$${parseFloat(order.total || 0).toFixed(2)}</div>
-                  <div class="order-meta">${isToday ? timeStr : dateStr + ' ' + timeStr}</div>
-                </div>
-                <select class="status-select" onchange="updateStatus('${order.id}', this.value)">
-                  <option value="new"      ${order.status === 'new' ? 'selected' : ''}>🟢 New</option>
-                  <option value="preparing"${order.status === 'preparing' ? 'selected' : ''}>🟡 Preparing</option>
-                  <option value="ready"   ${order.status === 'ready' ? 'selected' : ''}>🔵 Ready</option>
-                  <option value="done"    ${order.status === 'done' ? 'selected' : ''}>⚫ Done</option>
-                </select>
-              </div>
+	<div>
+		<div class="order-total">$${parseFloat(order.total || 0).toFixed(2)}</div>
+		<div class="order-meta">${isToday ? timeStr : dateStr + ' ' + timeStr}</div>
+	</div>
+	<select class="status-select" onchange="updateStatus('${order.id}', this.value)">
+		<option value="new"      ${order.status === 'new' ? 'selected' : ''}>🟢 New</option>
+		<option value="preparing"${order.status === 'preparing' ? 'selected' : ''}>🟡 Preparing</option>
+		<option value="ready"   ${order.status === 'ready' ? 'selected' : ''}>🔵 Ready</option>
+		<option value="done"    ${order.status === 'done' ? 'selected' : ''}>⚫ Done</option>
+	</select>
+	<button type="button" class="btn-refresh" style="color:#c0392b;margin-left:8px;" onclick="removeOrder('${order.id}')">Remove</button>
+</div>
             </div>`;
             }).join('');
         }
@@ -654,6 +655,25 @@
                 showToast('Failed to update status');
             }
         }
+
+        // ── REMOVE ORDER ──
+        async function removeOrder(id) {
+	try {
+		const res = await fetch(`${WORKER_URL}/order/${id}?token=${TOKEN}`, {
+			method: 'DELETE'
+		});
+		if (!res.ok) {
+			showToast('Failed to remove order');
+			return;
+		}
+		allOrders = allOrders.filter(o => o.id !== id);
+		updateStats();
+		renderOrders();
+		showToast('Order removed');
+	} catch {
+		showToast('Failed to remove order');
+	}
+}
 
         // ── TOAST ──
         function showToast(msg) {
