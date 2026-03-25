@@ -831,6 +831,9 @@
 
 	<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 	<script>
+		// ── Replace with your deployed Worker URL ──
+		const WORKER_URL = 'https://orders-worker.k-m-fryson112115.workers.dev/';
+
 		const baseUrl = 'https://docs.google.com/spreadsheets/d/16fTxHCLzN2vNP1uPzc4CVgK6HYFGvONlP6C8tk4UzgE/export?format=csv&gid=';
 		const dayConfigs = [
 			{ day: 0, gid: '690071597', label: 'Saturday' },
@@ -1037,46 +1040,62 @@
 		});
 
 		// ── CHECKOUT ──
-		document.getElementById('checkout-form').addEventListener('submit', e => {
+		document.getElementById('checkout-form').addEventListener('submit', async e => {
 			e.preventDefault();
 			if (!e.target.checkValidity()) { e.target.reportValidity(); return; }
 			if (cart.length === 0) { alert('Your cart is empty.'); return; }
 
-			const formData = new FormData(e.target);
-			formData.append('access_key', 'ed17f9c9-0993-4f9e-9176-1a9a1ea776f8');
-			formData.append('subject', 'New Order from TCDining Shop');
-			formData.append('items', cart.map(item =>
-				`${item.name} x${item.quantity} (Prep: ${item.prep}, Drink: ${item.drink}${item.specialMessage ? ', Note: ' + item.specialMessage : ''})`
-			).join('; '));
-			const now = new Date();
-			formData.append('timestamp', `${now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ${now.toLocaleTimeString()}`);
+			const name = document.getElementById('customerName').value.trim();
+			const phone = document.getElementById('customerNumber').value.trim();
+			const message = document.getElementById('orderMessage').value.trim();
+			const total = cart.reduce((s, item) => s + item.price * item.quantity, 0);
+
+			const orderPayload = {
+				name,
+				phone,
+				items: cart.map(item => ({
+					name: item.name,
+					price: item.price,
+					quantity: item.quantity,
+					prep: item.prep,
+					drink: item.drink,
+				})),
+				total: total.toFixed(2),
+				specialInstructions: [
+					...cart.filter(i => i.specialMessage).map(i => `${i.name}: ${i.specialMessage}`),
+					message
+				].filter(Boolean).join(' | '),
+			};
 
 			const resultDiv = document.getElementById('result');
 			resultDiv.textContent = 'Sending your order…';
 			resultDiv.className = '';
 
-			fetch('https://api.web3forms.com/submit', { method: 'POST', body: formData })
-				.then(async res => {
-					const json = await res.json();
-					if (res.ok) {
-						resultDiv.textContent = json.message || 'Order sent successfully!';
-						resultDiv.className = 'result-success';
-						cart = [];
-						updateCartUI();
-						e.target.reset();
-						document.getElementById('checkout-section').style.display = 'none';
-						document.getElementById('checkout-btn').disabled = false;
-					} else {
-						resultDiv.textContent = json.message || 'Failed to send order.';
-						resultDiv.className = 'result-error';
-						document.getElementById('checkout-btn').disabled = false;
-					}
-				})
-				.catch(() => {
-					resultDiv.textContent = 'Something went wrong. Please try again.';
+			try {
+				const res = await fetch(`${WORKER_URL}/order`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(orderPayload),
+				});
+				const json = await res.json();
+				if (res.ok && json.success) {
+					resultDiv.textContent = '✅ Order received! We\'ll have it ready for you.';
+					resultDiv.className = 'result-success';
+					cart = [];
+					updateCartUI();
+					e.target.reset();
+					document.getElementById('checkout-section').style.display = 'none';
+					document.getElementById('checkout-btn').disabled = false;
+				} else {
+					resultDiv.textContent = 'Failed to send order. Please try again.';
 					resultDiv.className = 'result-error';
 					document.getElementById('checkout-btn').disabled = false;
-				});
+				}
+			} catch {
+				resultDiv.textContent = 'Could not reach the server. Please try again.';
+				resultDiv.className = 'result-error';
+				document.getElementById('checkout-btn').disabled = false;
+			}
 		});
 
 		window.addEventListener('DOMContentLoaded', () => {
